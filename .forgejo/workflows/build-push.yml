@@ -3,7 +3,8 @@ name: Build and Push Backend Image
 on:
   push:
     branches:
-      - main
+      - development
+      - master
 
 jobs:
   build-and-push:
