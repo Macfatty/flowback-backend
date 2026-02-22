@@ -20,7 +20,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: git.local/${{ gitea.repository }}
+          # Added :3001 to specify the correct port for the local registry
+          images: git.local:3001/${{ gitea.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=tag
@@ -29,7 +30,8 @@ jobs:
       - name: Log in to Forgejo Container Registry
         uses: docker/login-action@v3
         with:
-          registry: git.local
+          # Added :3001 to match the insecure-registry configured on the Pi
+          registry: git.local:3001
           username: ${{ gitea.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
