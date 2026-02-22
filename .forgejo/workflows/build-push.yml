@@ -5,6 +5,8 @@ on:
     branches:
       - development
       - master
+    tags:
+      - 'v*.*.*' # Also triggers when you create a release tag (e.g., v1.0.0)
 
 jobs:
   build-and-push:
@@ -12,6 +14,17 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+
+      # Generates smart tags (e.g., :development, :v1.0.0, :sha-12345)
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: git.local/${{ gitea.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha,format=short
 
       - name: Log in to Forgejo Container Registry
         uses: docker/login-action@v3
@@ -28,4 +41,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: git.local/${{ gitea.repository }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
