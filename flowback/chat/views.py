@@ -59,7 +59,16 @@ class MessageChannelPreviewAPI(APIView):
         exclude_closed = serializers.BooleanField(required=False, default=True)
         closed_at__gte = serializers.DateTimeField(required=False)
         closed_at__lte = serializers.DateTimeField(required=False)
+        timestamp__gt = serializers.DateTimeField(required=False)
+        timestamp__lt = serializers.DateTimeField(required=False)
         channel_id = serializers.IntegerField(required=False)
+        order_by = serializers.ChoiceField(required=False,
+                                           default='message_created_at',
+                                           choices=['created_at', 'created_at_asc',
+                                                    '-created_at', 'created_at_desc',
+                                                    'timestamp', 'created_at_asc',
+                                                    '-timestamp', 'created_at_desc'
+                                                    ])
 
     class OutputSerializer(serializers.Serializer):
         id = serializers.IntegerField()
@@ -167,6 +176,7 @@ class MessageChannelUserDataUpdateAPI(APIView):
         channel_id = serializers.IntegerField()
         timestamp = serializers.DateTimeField(required=False)
         closed_at = serializers.DateTimeField(required=False)
+        title = serializers.CharField(required=False)
 
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)

@@ -114,8 +114,11 @@ def poll_create(*, user_id: int,
                                                   eta=poll.prediction_bet_end_date)
 
     if not poll.dynamic:
+        eta = poll.vote_end_date
+        if version == 2:
+            eta = end_date
         poll_proposal_vote_count.apply_async(kwargs=dict(poll_id=poll.id),
-                                             eta=poll.end_date)
+                                             eta=eta)
 
     notify_group_poll(message="A new poll has been posted",
                       action=NotificationChannel.Action.CREATED,
@@ -207,21 +210,21 @@ def poll_fast_forward(*, user_id: int, poll_id: int, phase: str):
 
     # TODO update/remove previous celery tasks
     if poll.version == 2:
-        if poll.prediction_bet_end_date > timezone.now():
+        if poll.prediction_bet_end_date and poll.prediction_bet_end_date > timezone.now():
             poll_kpi_count.apply_async(kwargs=dict(poll_id=poll.id), eta=poll.prediction_bet_end_date)
 
         else:
             poll_kpi_count(poll_id=poll.id)
 
     else:
-        if poll.area_vote_end_date > timezone.now():
+        if poll.area_vote_end_date and poll.area_vote_end_date > timezone.now():
             poll_area_vote_count.apply_async(kwargs=dict(poll_id=poll.id), eta=poll.area_vote_end_date)
 
         else:
             poll_area_vote_count(poll_id=poll.id)
 
     if not poll.poll_type == Poll.PollType.SCHEDULE:
-        if poll.prediction_bet_end_date > timezone.now():
+        if poll.prediction_bet_end_date and poll.prediction_bet_end_date > timezone.now():
             poll_prediction_bet_count.apply_async(kwargs=dict(poll_id=poll.id), eta=poll.prediction_bet_end_date)
 
         else:
